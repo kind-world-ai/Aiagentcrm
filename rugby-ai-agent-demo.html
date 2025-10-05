@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RugbyConnector AI Agent - Interactive Demo</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0a4d4d 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0a4d4d;
+        }
+
+        .logo span {
+            color: #2dd4bf;
+        }
+
+        .nav {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav a {
+            color: #4b5563;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav a:hover {
+            color: #0a4d4d;
+        }
+
+        .cta-button {
+            background: #0a4d4d;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 10px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            background: #2dd4bf;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(45, 212, 191, 0.3);
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        /* Chat Container */
+        .chat-container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            height: 700px;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #0a4d4d 0%, #0d6d6d 100%);
+            color: white;
+            padding: 25px 30px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .ai-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(45, 212, 191, 0.4);
+        }
+
+        .chat-header-info h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .chat-header-info p {
+            font-size: 13px;
+            opacity: 0.9;
+        }
+
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 25px;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .message.ai .message-avatar {
+            background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #0a4d4d 0%, #0d6d6d 100%);
+            color: white;
+        }
+
+        .message-content {
+            max-width: 75%;
+        }
+
+        .message-bubble {
+            padding: 14px 18px;
+            border-radius: 16px;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+
+        .message.ai .message-bubble {
+            background: white;
+            border: 2px solid #e5e7eb;
+            color: #1f2937;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, #0a4d4d 0%, #0d6d6d 100%);
+            color: white;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 5px;
+            padding: 0 5px;
+        }
+
+        /* Player Cards in Chat */
+        .player-card {
+            background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 100%);
+            border: 2px solid #2dd4bf;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 10px 0;
+            transition: all 0.3s;
+        }
+
+        .player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(45, 212, 191, 0.2);
+        }
+
+        .player-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .player-avatar {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #0a4d4d 0%, #0d6d6d 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .player-info h4 {
+            color: #0a4d4d;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .player-info p {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .player-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        .stat-icon {
+            color: #2dd4bf;
+        }
+
+        .match-score {
+            display: inline-block;
+            background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quick-action-btn {
+            background: white;
+            border: 2px solid #2dd4bf;
+            color: #0a4d4d;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .quick-action-btn:hover {
+            background: #2dd4bf;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* Chat Input */
+        .chat-input-container {
+            padding: 20px 25px;
+            background: white;
+            border-top: 2px solid #e5e7eb;
+        }
+
+        .suggestion-chips {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .chip {
+            background: #f0fdfa;
+            border: 1px solid #2dd4bf;
+            color: #0a4d4d;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .chip:hover {
+            background: #2dd4bf;
+            color: white;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 14px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+            transition: all 0.3s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .chat-input:focus {
+            border-color: #2dd4bf;
+            box-shadow: 0 0 0 3px rgba(45, 212, 191, 0.1);
+        }
+
+        .send-button {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #0a4d4d 0%, #0d6d6d 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-button:hover {
+            background: linear-gradient(135deg, #2dd4bf 0%, #14b8a6 100%);
+            transform: scale(1.05);
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-card h3 {
+            color: #0a4d4d;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 10px 0;
+            color: #4b5563;
+            font-size: 14px;
+            display: flex;
+            align-items: start;
+            gap: 10px;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            color: #2dd4bf;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #f0fdfa 0%, #ffffff 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #2dd4bf;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0a4d4d;
+            display: block;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 10px 15px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #94a3b8;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* Role Tags */
+        .role-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-right: 5px;
+        }
+
+        .role-tag.primary {
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+        }
+
+        .role-tag.secondary {
+            background: #e5e7eb;
+            color: #4b5563;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .sidebar {
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav {
+                display: none;
+            }
+            
+            .header {
+                padding: 15px 20px;
+            }
+            
+            .chat-container {
+                height: 600px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #2dd4bf;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">Rugby<span>Connector</span></div>
+            <div class="nav">
+                <a href="#">How It Works</a>
+                <a href="#">Players</a>
+                <a href="#">Clubs</a>
+                <a href="#">Testimonials</a>
+                <button class="cta-button">Get Started</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <div class="chat-header">
+                    <div class="ai-avatar">🤖</div>
+                    <div class="chat-header-info">
+                        <h2>RugbyConnector AI Agent</h2>
+                        <p><span class="status-indicator"></span>Powered by Claude Sonnet 4.5 - Online & Ready</p>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Welcome Message -->
+                    <div class="message ai">
+                        <div class="message-avatar">AI</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                👋 Welcome to RugbyConnector! I'm your AI assistant powered by Claude Sonnet 4.5.<br><br>
+                                I can help you with:<br>
+                                🔍 Finding players by position, experience & location<br>
+                                🏟️ Discovering rugby clubs worldwide<br>
+                                💼 Matching talent to job opportunities<br>
+                                📊 Managing your profile and applications<br><br>
+                                What would you like to do today?
+                            </div>
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+
+                    <!-- User Message 1 -->
+                    <div class="message user">
+                        <div class="message-avatar">JD</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                I'm looking for experienced fly-halves with international experience in Europe
+                            </div>
+                            <div class="message-time">2 min ago</div>
+                        </div>
+                    </div>
+
+                    <!-- AI Response with Player Cards -->
+                    <div class="message ai">
+                        <div class="message-avatar">AI</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                Perfect! I found 12 fly-halves with international experience in Europe. Here are the top 3 matches based on your criteria:
+                                
+                                <div class="player-card">
+                                    <div class="player-header">
+                                        <div class="player-avatar">SM</div>
+                                        <div class="player-info">
+                                            <h4>Sean Murphy</h4>
+                                            <p>
+                                                <span class="role-tag primary">Primary: Fly-Half</span>
+                                                <span class="role-tag secondary">Secondary: Centre</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="player-stats">
+                                        <div class="stat">
+                                            <span class="stat-icon">🏉</span>
+                                            <span>15 years experience</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-icon">🌍</span>
+                                            <span>Dublin, Ireland</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-icon">⭐</span>
+                                            <span>International Level</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-icon">✓</span>
+                                            <span>Available Now</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-icon">🏆</span>
+                                        <span><strong>Previous:</strong> Leinster Rugby, Munster Rugby</span>
+                                    </div>
+                                    <span class="match-score">98% Match</span>
+                                </div>
+
+                                <div class="player-card">
+                                    <div class="player-header">
+                                        <div class="player-avatar">LB</div>
+                                        <div class="player-info">
+                                            <h4>Laurent Blanc</h4>
+                                            <p>
+                                                <span class="role-tag primary">Primary: Fly-Half</span>
+                                                <span class="role-tag secondary">Secondary: Full-Back</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="player-stats">
+                                        <div class="stat">
+                                            <span class="stat-icon">🏉</span>
+                                            <span>12 years experience</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-icon">🌍</span>
+                                            <span>Paris, France</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-icon">⭐</span>
+                                            <span>International Level</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-icon">✓</span>
+                                            <span>Available from Jan 2026</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-icon">🏆</span>
+                                        <span><strong>Previous:</strong> Stade Français, Toulon</span>
+                                    </div>
+                                    <span class="match-score">95% Match</span>
+                                </div>
+
+                                <div class="player-card">
+                                    <div class="player-header">
+                                        <div class="player-avatar">MR</div>
+                                        <div class="player-info">
+                                            <h4>Marco Rossi</h4>
+                                            <p>
+                                                <span class="role-tag primary">Primary: Fly-Half</span>
+                                                <span class="role-tag secondary">Secondary: Scrum-Half</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div class="player-stats">
+                                        <div class="stat">
+                                            <span class="stat-icon">🏉</span>
+                                            <span>10 years experience</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-icon">🌍</span>
+                                            <span>Rome, Italy</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-icon">⭐</span>
+                                            <span>International Level</span>
+                                        </div>
+                                        <div class="stat">
+                                            <span class="stat-icon">✓</span>
+                                            <span>Available Now</span>
+                                        </div>
+                                    </div>
+                                    <div class="stat">
+                                        <span class="stat-icon">🏆</span>
+                                        <span><strong>Previous:</strong> Benetton Rugby, Zebre</span>
+                                    </div>
+                                    <span class="match-score">92% Match</span>
+                                </div>
+
+                                <div class="quick-actions">
+                                    <button class="quick-action-btn" onclick="addUserMessage('View all 12 matches')">View All 12 Matches</button>
+                                    <button class="quick-action-btn" onclick="addUserMessage('Show me their contact details')">Contact Players</button>
+                                    <button class="quick-action-btn" onclick="addUserMessage('Filter by salary expectations')">Filter by Salary</button>
+                                </div>
+                            </div>
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+
+                    <!-- Example User Query 2 -->
+                    <div class="message user">
+                        <div class="message-avatar">JD</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                Tell me more about Sean Murphy's playing style and achievements
+                            </div>
+                            <div class="message-time">1 min ago</div>
+                        </div>
+                    </div>
+
+                    <!-- AI Detailed Response -->
+                    <div class="message ai">
+                        <div class="message-avatar">AI</div>
+                        <div class="message-content">
+                            <div class="message-bubble">
+                                <strong>Sean Murphy - Detailed Profile</strong><br><br>
+                                
+                                <strong>🏉 Playing Style:</strong><br>
+                                • Exceptional tactical kicker with 85% accuracy<br>
+                                • Strong decision-maker under pressure<br>
+                                • Excellent distribution skills<br>
+                                • Natural leader on and off the field<br><br>
+
+                                <strong>🏆 Career Highlights:</strong><br>
+                                • 45 International caps for Ireland (2015-2023)<br>
+                                • 6 Nations Championship winner (2018, 2023)<br>
+                                • Pro14 Champion with Leinster (2019, 2021)<br>
+                                • European Champions Cup Semi-finalist<br><br>
+
+                                <strong>📊 Recent Statistics:</strong><br>
+                                • 280 points scored last season<br>
+                                • 92% pass completion rate<br>
+                                • 78% tackle success rate<br><br>
+
+                                <strong>💬 Languages:</strong> English (Native), Irish, French (Intermediate)<br><br>
+
+                                <strong>✓ Availability:</strong> Immediate - Currently seeking new opportunities<br>
+                                <strong>💰 Salary Expectation:</strong> €80,000 - €120,000/year<br><br>
+
+                                Would you like to:<br>
+                                <div class="quick-actions">
+                                    <button class="quick-action-btn" onclick="addUserMessage('Contact Sean Murphy')">Contact Sean</button>
+                                    <button class="quick-action-btn" onclick="addUserMessage('Schedule interview with Sean')">Schedule Interview</button>
+                                    <button class="quick-action-btn" onclick="addUserMessage('Compare with other players')">Compare Players</button>
+                                </div>
+                            </div>
+                            <div class="message-time">Just now</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="suggestion-chips">
+                        <div class="chip" onclick="addUserMessage('Find props with club experience')">Find Props</div>
+                        <div class="chip" onclick="addUserMessage('Show coaching positions')">Coaching Jobs</div>
+                        <div class="chip" onclick="addUserMessage('Clubs in Ireland')">Irish Clubs</div>
+                        <div class="chip" onclick="addUserMessage('My applications status')">My Applications</div>
+                    </div>
+                    <div class="chat-input-wrapper">
+                        <input type="text" class="chat-input" id="userInput" placeholder="Type your message... (e.g., 'Find centers in France' or 'Show job openings')">
+                        <button class="send-button" onclick="sendMessage()">
+                            <span>➤</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- AI Capabilities Card -->
+                <div class="info-card">
+                    <h3>🤖 AI Agent Features</h3>
+                    <ul class="feature-list">
+                        <li>Natural language player search</li>
+                        <li>Intelligent role matching (Primary & Secondary positions)</li>
+                        <li>Experience level filtering</li>
+                        <li>Location-based discovery</li>
+                        <li>Real-time availability tracking</li>
+                        <li>Multi-language support</li>
+                        <li>Salary & compensation matching</li>
+                        <li>Club history analysis</li>
+                        <li>WhatsApp notifications</li>
+                        <li>Automated interview scheduling</li>
+                    </ul>
+                </div>
+
+                <!-- Platform Stats -->
+                <div class="info-card">
+                    <h3>📊 Live Platform Stats</h3>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="number">5,247</span>
+                            <span class="label">Active Players</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="number">1,289</span>
+                            <span class="label">Rugby Clubs</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="number">45</span>
+                            <span class="label">Countries</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="number">423</span>
+                            <span class="label">Active Jobs</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sample Queries -->
+                <div class="info-card">
+                    <h3>💡 Try These Queries</h3>
+                    <ul class="feature-list">
+                        <li>"Find experienced props in South Africa"</li>
+                        <li>"Show me centres available immediately"</li>
+                        <li>"Players with national team experience"</li>
+                        <li>"Coaching positions in France"</li>
+                        <li>"Compare these three players"</li>
+                        <li>"Update my availability status"</li>
+                        <li>"Show clubs in New Zealand"</li>
+                        <li>"Players under 25 years old"</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let messageCount = 0;
+
+        function addUserMessage(text) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const userInput = document.getElementById('userInput');
+            
+            if (!text) {
+                text = userInput.value.trim();
+            }
+            
+            if (!text) return;
+
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.innerHTML = `
+                <div class="message-avatar">You</div>
+                <div class="message-content">
+                    <div class="message-bubble">${text}</div>
+                    <div class="message-time">Just now</div>
+                </div>
+            `;
+            messagesContainer.appendChild(userMsg);
+            
+            // Clear input
+            userInput.value = '';
+            
+            // Scroll to bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Show typing indicator
+            setTimeout(() => {
+                showTypingIndicator();
+                
+                // Simulate AI response after delay
+                setTimeout(() => {
+                    removeTypingIndicator();
+                    addAIResponse(text);
+                }, 2000);
+            }, 500);
+        }
+
+        function showTypingIndicator() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'message ai typing-message';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">AI</div>
+                <div class="message-content">
+                    <div class="message-bubble">
+                        <div class="typing-indicator">
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                            <div class="typing-dot"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesContainer.appendChild(typingDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const typing = document.querySelector('.typing-message');
+            if (typing) typing.remove();
+        }
+
+        function addAIResponse(userQuery) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const aiMsg = document.createElement('div');
+            aiMsg.className = 'message ai';
+            
+            let response = getSmartResponse(userQuery);
+            
+            aiMsg.innerHTML = `
+                <div class="message-avatar">AI</div>
+                <div class="message-content">
+                    <div class="message-bubble">${response}</div>
+                    <div class="message-time">Just now</div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(aiMsg);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function getSmartResponse(query) {
+            query = query.toLowerCase();
+            
+            if (query.includes('prop') || query.includes('forward')) {
+                return `I found 18 props matching your criteria:<br><br>
+                    <div class="player-card">
+                        <div class="player-header">
+                            <div class="player-avatar">TJ</div>
+                            <div class="player-info">
+                                <h4>Tom Jenkins</h4>
+                                <p>
+                                    <span class="role-tag primary">Primary: Prop</span>
+                                    <span class="role-tag secondary">Secondary: Hooker</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="player-stats">
+                            <div class="stat"><span class="stat-icon">🏉</span><span>8 years experience</span></div>
+                            <div class="stat"><span class="stat-icon">🌍</span><span>Cardiff, Wales</span></div>
+                            <div class="stat"><span class="stat-icon">⭐</span><span>Club Level</span></div>
+                            <div class="stat"><span class="stat-icon">✓</span><span>Available Now</span></div>
+                        </div>
+                        <span class="match-score">96% Match</span>
+                    </div>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="addUserMessage('Show all props')">View All Matches</button>
+                        <button class="quick-action-btn" onclick="addUserMessage('Contact Tom Jenkins')">Contact Player</button>
+                    </div>`;
+            }
+            
+            if (query.includes('centre') || query.includes('center')) {
+                return `I found 24 centres available. Here's a top match:<br><br>
+                    <div class="player-card">
+                        <div class="player-header">
+                            <div class="player-avatar">AD</div>
+                            <div class="player-info">
+                                <h4>Antoine Dupont</h4>
+                                <p>
+                                    <span class="role-tag primary">Primary: Centre</span>
+                                    <span class="role-tag secondary">Secondary: Wing</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="player-stats">
+                            <div class="stat"><span class="stat-icon">🏉</span><span>11 years experience</span></div>
+                            <div class="stat"><span class="stat-icon">🌍</span><span>Toulouse, France</span></div>
+                            <div class="stat"><span class="stat-icon">⭐</span><span>International Level</span></div>
+                            <div class="stat"><span class="stat-icon">✓</span><span>Available from Jul 2026</span></div>
+                        </div>
+                        <span class="match-score">97% Match</span>
+                    </div>`;
+            }
+            
+            if (query.includes('coach') || query.includes('job')) {
+                return `I found 15 coaching positions available:<br><br>
+                    💼 <strong>Head Coach - Women's Team</strong><br>
+                    🏟️ Leinster Rugby, Dublin<br>
+                    💰 €55,000 - €70,000/year<br>
+                    📅 Start: March 2026<br><br>
+                    💼 <strong>Skills Coach</strong><br>
+                    🏟️ Toulouse Rugby, France<br>
+                    💰 €40,000 - €50,000/year<br>
+                    📅 Start: Immediate<br><br>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="addUserMessage('Apply to head coach position')">Apply Now</button>
+                        <button class="quick-action-btn" onclick="addUserMessage('Show more jobs')">View All Jobs</button>
+                    </div>`;
+            }
+            
+            if (query.includes('club')) {
+                return `I found 47 rugby clubs matching your search:<br><br>
+                    🏟️ <strong>Munster Rugby</strong><br>
+                    📍 Limerick, Ireland<br>
+                    ⭐ Professional Level<br>
+                    👥 Men's, Women's & Youth Teams<br><br>
+                    🏟️ <strong>Stade Français</strong><br>
+                    📍 Paris, France<br>
+                    ⭐ Professional Level<br>
+                    👥 Men's & Women's Teams<br><br>
+                    Would you like more details about any specific club?`;
+            }
+            
+            if (query.includes('contact') || query.includes('schedule') || query.includes('interview')) {
+                return `✅ Perfect! I can help you with that.<br><br>
+                    I've prepared a contact request for this player. The message will be sent via:<br>
+                    📧 Email<br>
+                    📱 WhatsApp notification<br>
+                    💬 Platform messaging<br><br>
+                    Would you like to:<br>
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" onclick="addUserMessage('Send contact request')">Send Request</button>
+                        <button class="quick-action-btn" onclick="addUserMessage('Schedule meeting')">Schedule Meeting</button>
+                        <button class="quick-action-btn" onclick="addUserMessage('View player profile')">View Full Profile</button>
+                    </div>`;
+            }
+            
+            // Default response
+            return `I understand! Let me help you with that.<br><br>
+                I can assist with:<br>
+                🔍 Finding players by position and experience<br>
+                🏟️ Discovering rugby clubs worldwide<br>
+                💼 Searching job opportunities<br>
+                📊 Managing profiles and applications<br>
+                📱 Scheduling meetings and interviews<br><br>
+                What specific information do you need?<br>
+                <div class="quick-actions">
+                    <button class="quick-action-btn" onclick="addUserMessage('Search for players')">Search Players</button>
+                    <button class="quick-action-btn" onclick="addUserMessage('Find clubs')">Find Clubs</button>
+                    <button class="quick-action-btn" onclick="addUserMessage('Browse jobs')">Browse Jobs</button>
+                </div>`;
+        }
+
+        function sendMessage() {
+            addUserMessage();
+        }
+
+        // Enter key support
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Auto-scroll chat on load
+        window.onload = function() {
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        };
+    </script>
+</body>
+</html>
