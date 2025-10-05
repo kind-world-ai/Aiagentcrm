@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent - ITR CRM Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #5B4EC3;
+            --primary-dark: #2D1B69;
+            --secondary: #E8E5F3;
+            --accent: #0284C7;
+            --text-dark: #1F2937;
+            --text-light: #6B7280;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .slide-in { animation: slideIn 0.3s ease-out; }
+        .typing-indicator { animation: pulse 1.5s ease-in-out infinite; }
+        .gradient-text {
+            color: var(--primary);
+        }
+        .glass-effect {
+            background: rgba(91, 78, 195, 0.08);
+            border: 1px solid rgba(91, 78, 195, 0.15);
+        }
+        .agent-thinking {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulse 1.5s ease-in-out infinite;
+            margin: 0 2px;
+        }
+        .action-card {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .action-card:hover {
+            border-left-color: var(--primary);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(91, 78, 195, 0.15);
+        }
+        .metric-card {
+            background: linear-gradient(135deg, rgba(91, 78, 195, 0.05) 0%, rgba(2, 132, 199, 0.05) 100%);
+        }
+        .bg-primary { background-color: var(--primary); }
+        .bg-primary-dark { background-color: var(--primary-dark); }
+        .bg-secondary { background-color: var(--secondary); }
+        .bg-accent { background-color: var(--accent); }
+        .text-primary { color: var(--primary); }
+        .text-accent { color: var(--accent); }
+        .border-primary { border-color: var(--primary); }
+        .nav-item {
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+    <!-- Main Container -->
+    <div class="flex h-screen">
+
+        <!-- Sidebar -->
+        <div class="w-72 bg-primary-dark flex flex-col text-white">
+            <!-- Logo & Header -->
+            <div class="p-6 border-b border-white/10">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center bg-white/20">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold text-white">AI Agent</h1>
+                        <p class="text-xs text-white/60">ITR CRM Assistant</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="p-6 flex-1 overflow-y-auto">
+                <h3 class="text-xs font-semibold text-white/50 uppercase mb-4">Quick Insights</h3>
+                <div class="space-y-3">
+                    <button onclick="demoInsights()" class="w-full nav-item text-left p-3 rounded-lg hover:bg-white/10 transition-all group">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-white/10">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-white">Activity Analysis</p>
+                                <p class="text-xs text-white/60">Last 7 days</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button onclick="demoDeadlines()" class="w-full nav-item text-left p-3 rounded-lg hover:bg-white/10 transition-all group">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-red-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-white">Deadline Monitor</p>
+                                <p class="text-xs text-white/60">3 urgent items</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button onclick="demoWorkload()" class="w-full nav-item text-left p-3 rounded-lg hover:bg-white/10 transition-all group">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-white/10">
+                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-white">Team Workload</p>
+                                <p class="text-xs text-white/60">Optimize distribution</p>
+                            </div>
+                        </div>
+                    </button>
+
+                    <button onclick="demoSmart()" class="w-full nav-item text-left p-3 rounded-lg hover:bg-white/10 transition-all group">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                </svg>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium text-white">Smart Suggestions</p>
+                                <p class="text-xs text-white/60">AI-powered tips</p>
+                            </div>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Agent Status -->
+                <div class="mt-8 p-4 rounded-lg bg-white/10 border border-white/20">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                        <span class="text-xs font-semibold text-white">Agent Active</span>
+                    </div>
+                    <p class="text-xs text-white/70">Monitoring 6 clients, 12 active jobs</p>
+                </div>
+            </div>
+
+            <!-- User Profile -->
+            <div class="p-6 border-t border-white/10">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold bg-primary text-white">
+                        NK
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-white">Niall Kelly</p>
+                        <p class="text-xs text-white/60">Admin</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="flex-1 flex flex-col bg-white">
+
+            <!-- Chat Header -->
+            <div class="bg-white border-b border-gray-200 p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold gradient-text">Intelligent Assistant</h2>
+                        <p class="text-sm text-gray-600 mt-1">Ask me anything about your clients, jobs, or deadlines</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <button class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50 transition-all text-sm text-gray-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                        </button>
+                        <button class="px-4 py-2 rounded-lg bg-accent hover:bg-accent/90 transition-all text-sm text-white font-medium">
+                            Export
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50">
+
+                <!-- Welcome Message -->
+                <div class="slide-in">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-none p-4 max-w-2xl shadow-sm">
+                                <p class="text-sm text-gray-700 mb-3">👋 Hello Niall! I'm your AI assistant for ITR CRM. I can help you with:</p>
+                                <ul class="space-y-2 text-sm text-gray-600">
+                                    <li class="flex items-center space-x-2">
+                                        <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Analyzing activity patterns and client engagement</span>
+                                    </li>
+                                    <li class="flex items-center space-x-2">
+                                        <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Monitoring deadlines and suggesting priorities</span>
+                                    </li>
+                                    <li class="flex items-center space-x-2">
+                                        <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Optimizing team workload distribution</span>
+                                    </li>
+                                    <li class="flex items-center space-x-2">
+                                        <svg class="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <span>Providing actionable insights for better decisions</span>
+                                    </li>
+                                </ul>
+                                <div class="mt-4 flex flex-wrap gap-2">
+                                    <button onclick="demoInsights()" class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        📊 Show activity insights
+                                    </button>
+                                    <button onclick="demoDeadlines()" class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        ⏰ Check urgent deadlines
+                                    </button>
+                                    <button onclick="demoWorkload()" class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        👥 Analyze team workload
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Just now</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Input Area -->
+            <div class="bg-white border-t border-gray-200 p-6 shadow-lg">
+                <div class="max-w-4xl mx-auto">
+                    <div id="inputContainer" class="flex items-center gap-3 bg-gray-50 rounded-2xl p-2 border border-gray-200 shadow-sm transition-all duration-200">
+                        <div class="flex-1 px-2">
+                            <textarea
+                                id="messageInput"
+                                rows="1"
+                                class="w-full bg-transparent border-0 px-2 py-2 text-sm text-gray-900 placeholder-gray-500 focus:outline-none resize-none"
+                                placeholder="Ask me anything about your clients, jobs, or deadlines..."
+                                onkeydown="handleKeyPress(event)"
+                                onfocus="handleInputFocus()"
+                                onblur="handleInputBlur()"
+                            ></textarea>
+                        </div>
+                        <button
+                            onclick="sendMessage()"
+                            class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary/90 transition-all font-medium text-sm text-white flex items-center gap-2 shadow-sm hover:shadow-md"
+                        >
+                            <span>Send</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center flex items-center justify-center gap-1">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                        AI Agent is analyzing real-time data from your CRM • Press Enter to send
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let messageCount = 1;
+
+        function handleInputFocus() {
+            const container = document.getElementById('inputContainer');
+            container.classList.remove('border-gray-200');
+            container.classList.add('border-primary', 'shadow-md', 'ring-2', 'ring-primary/20');
+        }
+
+        function handleInputBlur() {
+            const container = document.getElementById('inputContainer');
+            container.classList.add('border-gray-200');
+            container.classList.remove('border-primary', 'shadow-md', 'ring-2', 'ring-primary/20');
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addUserMessage(message);
+            input.value = '';
+            
+            // Simulate AI thinking
+            setTimeout(() => {
+                addTypingIndicator();
+            }, 500);
+
+            setTimeout(() => {
+                removeTypingIndicator();
+                addAIResponse(message);
+            }, 2000);
+        }
+
+        function addUserMessage(message) {
+            const messagesDiv = document.getElementById('chatMessages');
+            const messageHTML = `
+                <div class="slide-in">
+                    <div class="flex items-start space-x-3 justify-end">
+                        <div class="flex-1 flex justify-end">
+                            <div class="bg-primary text-white rounded-2xl rounded-tr-none p-4 max-w-2xl shadow-sm">
+                                <p class="text-sm">${message}</p>
+                            </div>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0 text-sm font-bold text-white">
+                            NK
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.insertAdjacentHTML('beforeend', messageHTML);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const indicatorHTML = `
+                <div id="typingIndicator" class="slide-in">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-none p-4 shadow-sm">
+                            <div class="flex space-x-1">
+                                <span class="agent-thinking"></span>
+                                <span class="agent-thinking" style="animation-delay: 0.2s"></span>
+                                <span class="agent-thinking" style="animation-delay: 0.4s"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.insertAdjacentHTML('beforeend', indicatorHTML);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) indicator.remove();
+        }
+
+        function addAIResponse(userMessage) {
+            const responses = {
+                'default': 'I understand your query. Let me analyze the current data and provide you with actionable insights.',
+            };
+            
+            let response = responses['default'];
+            if (userMessage.toLowerCase().includes('client')) {
+                demoInsights();
+                return;
+            } else if (userMessage.toLowerCase().includes('deadline')) {
+                demoDeadlines();
+                return;
+            } else if (userMessage.toLowerCase().includes('workload') || userMessage.toLowerCase().includes('team')) {
+                demoWorkload();
+                return;
+            }
+            
+            const messagesDiv = document.getElementById('chatMessages');
+            const responseHTML = `
+                <div class="slide-in">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-none p-4 max-w-2xl shadow-sm">
+                                <p class="text-sm text-gray-700">${response}</p>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Just now</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.insertAdjacentHTML('beforeend', responseHTML);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function demoInsights() {
+            addUserMessage("Show me activity insights for the past week");
+            setTimeout(() => addTypingIndicator(), 500);
+            setTimeout(() => {
+                removeTypingIndicator();
+                showInsightsResponse();
+            }, 2500);
+        }
+
+        function showInsightsResponse() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const responseHTML = `
+                <div class="slide-in">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-none p-4 max-w-3xl shadow-sm">
+                                <p class="text-sm text-gray-700 mb-4">📊 I've analyzed your activity data from the past 7 days. Here's what I found:</p>
+
+                                <!-- Metrics Grid -->
+                                <div class="grid grid-cols-3 gap-3 mb-4">
+                                    <div class="metric-card rounded-lg p-3 border border-gray-200">
+                                        <p class="text-xs text-gray-500">Total Activities</p>
+                                        <p class="text-2xl font-bold text-gray-900 mt-1">127</p>
+                                        <p class="text-xs text-green-600 mt-1">↑ 23% from last week</p>
+                                    </div>
+                                    <div class="metric-card rounded-lg p-3 border border-gray-200">
+                                        <p class="text-xs text-gray-500">Active Clients</p>
+                                        <p class="text-2xl font-bold text-gray-900 mt-1">18</p>
+                                        <p class="text-xs text-primary">6 new interactions</p>
+                                    </div>
+                                    <div class="metric-card rounded-lg p-3 border border-gray-200">
+                                        <p class="text-xs text-gray-500">Pending Items</p>
+                                        <p class="text-2xl font-bold text-gray-900 mt-1">9</p>
+                                        <p class="text-xs text-red-600">3 need attention</p>
+                                    </div>
+                                </div>
+
+                                <!-- Key Insights -->
+                                <div class="space-y-3 mb-4">
+                                    <div class="action-card bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-8 h-8 rounded-lg bg-yellow-100 flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-medium text-gray-900">Acme Consulting needs follow-up</p>
+                                                <p class="text-xs text-gray-600 mt-1">No activity in 4 days. Last action: "Note Added" for Income Tax Returns - 2024</p>
+                                                <button class="mt-2 text-xs text-primary hover:underline font-medium">→ Create reminder</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="action-card bg-green-50 rounded-lg p-3 border border-green-200">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-medium text-gray-900">Smith Consulting shows high engagement</p>
+                                                <p class="text-xs text-gray-600 mt-1">3 tasks completed this week. VAT returns on track for deadline</p>
+                                                <button class="mt-2 text-xs text-primary hover:underline font-medium">→ View details</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="action-card bg-blue-50 rounded-lg p-3 border border-blue-200">
+                                        <div class="flex items-start space-x-3">
+                                            <div class="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                                                </svg>
+                                            </div>
+                                            <div class="flex-1">
+                                                <p class="text-sm font-medium text-gray-900">Activity trending upward</p>
+                                                <p class="text-xs text-gray-600 mt-1">Team productivity up 23% compared to last week. Keep up the great work!</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Actions -->
+                                <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-200">
+                                    <button class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        📧 Send follow-up emails
+                                    </button>
+                                    <button class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        📊 Generate full report
+                                    </button>
+                                    <button class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        ⚙️ Configure alerts
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Just now • Analysis based on 127 data points</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.insertAdjacentHTML('beforeend', responseHTML);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function demoDeadlines() {
+            addUserMessage("What are my urgent deadlines?");
+            setTimeout(() => addTypingIndicator(), 500);
+            setTimeout(() => {
+                removeTypingIndicator();
+                showDeadlineResponse();
+            }, 2500);
+        }
+
+        function showDeadlineResponse() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const responseHTML = `
+                <div class="slide-in">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-none p-4 max-w-3xl shadow-sm">
+                                <p class="text-sm text-gray-700 mb-4">⏰ I've identified <span class="text-red-600 font-bold">3 urgent deadlines</span> that need immediate attention:</p>
+
+                                <!-- Urgent Deadlines -->
+                                <div class="space-y-3 mb-4">
+                                    <div class="action-card bg-red-50 rounded-lg p-4 border border-red-200">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2 mb-2">
+                                                    <span class="px-2 py-0.5 bg-red-100 text-red-700 text-xs rounded-full font-medium">URGENT</span>
+                                                    <span class="text-xs text-gray-600">Due in 2 days</span>
+                                                </div>
+                                                <p class="text-sm font-semibold text-gray-900">Marketing Plus Limited - Audit 2024</p>
+                                                <p class="text-xs text-gray-600 mt-1">External client • Assigned to your team</p>
+                                                <div class="mt-3 flex items-center space-x-4 text-xs">
+                                                    <span class="text-gray-600">📅 Due: Jul 7, 2025</span>
+                                                    <span class="text-yellow-700">⚠️ Not started</span>
+                                                </div>
+                                            </div>
+                                            <button class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium transition-all">
+                                                Start Now
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="action-card bg-orange-50 rounded-lg p-4 border border-orange-200">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2 mb-2">
+                                                    <span class="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs rounded-full font-medium">HIGH</span>
+                                                    <span class="text-xs text-gray-600">Due in 5 days</span>
+                                                </div>
+                                                <p class="text-sm font-semibold text-gray-900">Tech Solutions Limited - Annual Returns 2024</p>
+                                                <p class="text-xs text-gray-600 mt-1">External client • 60% complete</p>
+                                                <div class="mt-3 flex items-center space-x-4 text-xs">
+                                                    <span class="text-gray-600">📅 Due: Jul 10, 2025</span>
+                                                    <span class="text-blue-600">🔄 In progress</span>
+                                                </div>
+                                            </div>
+                                            <button class="px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium transition-all">
+                                                Continue
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="action-card bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                                        <div class="flex items-start justify-between gap-3">
+                                            <div class="flex-1">
+                                                <div class="flex items-center space-x-2 mb-2">
+                                                    <span class="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">MEDIUM</span>
+                                                    <span class="text-xs text-gray-600">Due in 7 days</span>
+                                                </div>
+                                                <p class="text-sm font-semibold text-gray-900">Property Solutions - CRO Alert Review</p>
+                                                <p class="text-xs text-gray-600 mt-1">External client • Action required</p>
+                                                <div class="mt-3 flex items-center space-x-4 text-xs">
+                                                    <span class="text-gray-600">📅 Due: Jul 12, 2025</span>
+                                                    <span class="text-purple-600">🔔 Alert pending</span>
+                                                </div>
+                                            </div>
+                                            <button class="px-3 py-1.5 rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-medium transition-all">
+                                                Review
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- AI Recommendations -->
+                                <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                    <div class="flex items-start space-x-3">
+                                        <svg class="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                        </svg>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-900 mb-2">💡 Smart Recommendation</p>
+                                            <p class="text-xs text-gray-700">I suggest prioritizing Marketing Plus Limited's audit first. I can automatically notify the assigned team member and create a task breakdown to meet the deadline.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Actions -->
+                                <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-200 mt-4">
+                                    <button class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        📧 Notify team members
+                                    </button>
+                                    <button class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        📋 Create task breakdown
+                                    </button>
+                                    <button class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        📅 Add to calendar
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Just now • Monitoring 12 active deadlines</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.insertAdjacentHTML('beforeend', responseHTML);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function demoWorkload() {
+            addUserMessage("Analyze team workload and suggest optimizations");
+            setTimeout(() => addTypingIndicator(), 500);
+            setTimeout(() => {
+                removeTypingIndicator();
+                showWorkloadResponse();
+            }, 2500);
+        }
+
+        function showWorkloadResponse() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const responseHTML = `
+                <div class="slide-in">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-none p-4 max-w-3xl shadow-sm">
+                                <p class="text-sm text-gray-700 mb-4">👥 Team Workload Analysis complete. Here's the current distribution:</p>
+
+                                <!-- Team Members -->
+                                <div class="space-y-3 mb-4">
+                                    <div class="bg-green-50 rounded-lg p-4 border border-green-200">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-sm font-bold text-white">
+                                                    JD
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">John Doe</p>
+                                                    <p class="text-xs text-gray-600">Senior Accountant</p>
+                                                </div>
+                                            </div>
+                                            <span class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">✓ Optimal</span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between text-xs mb-1">
+                                                <span class="text-gray-600">Workload</span>
+                                                <span class="text-gray-900 font-medium">65%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-gradient-to-r from-green-500 to-emerald-600 h-2 rounded-full" style="width: 65%"></div>
+                                            </div>
+                                            <div class="flex items-center space-x-4 mt-3 text-xs text-gray-600">
+                                                <span>📋 8 active jobs</span>
+                                                <span>⏰ 32 hours this week</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-red-50 rounded-lg p-4 border border-red-200 border-l-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center text-sm font-bold text-white">
+                                                    SK
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Sarah Kelly</p>
+                                                    <p class="text-xs text-gray-600">Tax Specialist</p>
+                                                </div>
+                                            </div>
+                                            <span class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-medium">⚠️ Overloaded</span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between text-xs mb-1">
+                                                <span class="text-gray-600">Workload</span>
+                                                <span class="text-red-700 font-medium">92%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-gradient-to-r from-red-500 to-orange-600 h-2 rounded-full" style="width: 92%"></div>
+                                            </div>
+                                            <div class="flex items-center space-x-4 mt-3 text-xs text-gray-600">
+                                                <span>📋 12 active jobs</span>
+                                                <span>⏰ 46 hours this week</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200 border-l-4">
+                                        <div class="flex items-center justify-between mb-3">
+                                            <div class="flex items-center space-x-3">
+                                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-sm font-bold text-white">
+                                                    MJ
+                                                </div>
+                                                <div>
+                                                    <p class="text-sm font-medium text-gray-900">Mike Johnson</p>
+                                                    <p class="text-xs text-gray-600">Junior Accountant</p>
+                                                </div>
+                                            </div>
+                                            <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full font-medium">📊 Underutilized</span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <div class="flex justify-between text-xs mb-1">
+                                                <span class="text-gray-600">Workload</span>
+                                                <span class="text-gray-900 font-medium">38%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                                <div class="bg-gradient-to-r from-blue-500 to-cyan-600 h-2 rounded-full" style="width: 38%"></div>
+                                            </div>
+                                            <div class="flex items-center space-x-4 mt-3 text-xs text-gray-600">
+                                                <span>📋 4 active jobs</span>
+                                                <span>⏰ 19 hours this week</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- AI Recommendations -->
+                                <div class="bg-purple-50 rounded-lg p-4 border border-purple-200 mb-4">
+                                    <div class="flex items-start space-x-3">
+                                        <svg class="w-5 h-5 text-purple-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                                        </svg>
+                                        <div class="flex-1">
+                                            <p class="text-sm font-medium text-gray-900 mb-3">💡 Optimization Suggestions</p>
+                                            <ul class="space-y-2 text-xs text-gray-700">
+                                                <li class="flex items-start space-x-2">
+                                                    <span class="text-primary flex-shrink-0">▸</span>
+                                                    <span>Reassign 3 jobs from Sarah Kelly to Mike Johnson to balance workload</span>
+                                                </li>
+                                                <li class="flex items-start space-x-2">
+                                                    <span class="text-primary flex-shrink-0">▸</span>
+                                                    <span>Property Solutions CRO Alert is well-suited for Mike's skill level</span>
+                                                </li>
+                                                <li class="flex items-start space-x-2">
+                                                    <span class="text-primary flex-shrink-0">▸</span>
+                                                    <span>This optimization could reduce Sarah's workload by 25% and improve team efficiency</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Quick Actions -->
+                                <div class="flex flex-wrap gap-2 pt-3 border-t border-gray-200">
+                                    <button class="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-white text-xs transition-all font-medium">
+                                        ✨ Auto-optimize workload
+                                    </button>
+                                    <button class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        📊 View detailed report
+                                    </button>
+                                    <button class="px-3 py-1.5 rounded-lg bg-primary/10 hover:bg-primary/20 text-xs transition-all text-primary font-medium">
+                                        📧 Notify team
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Just now • Based on real-time workload data</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.insertAdjacentHTML('beforeend', responseHTML);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function demoSmart() {
+            addUserMessage("Give me smart suggestions to improve efficiency");
+            setTimeout(() => addTypingIndicator(), 500);
+            setTimeout(() => {
+                removeTypingIndicator();
+                showSmartSuggestions();
+            }, 2500);
+        }
+
+        function showSmartSuggestions() {
+            const messagesDiv = document.getElementById('chatMessages');
+            const responseHTML = `
+                <div class="slide-in">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-primary text-white">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-white border border-gray-200 rounded-2xl rounded-tl-none p-4 max-w-3xl shadow-sm">
+                                <p class="text-sm text-gray-700 mb-4">🎯 Based on your activity patterns, here are personalized suggestions to boost efficiency:</p>
+
+                                <div class="space-y-3">
+                                    <div class="action-card bg-purple-50 rounded-lg p-4 border border-purple-200">
+                                        <p class="text-sm font-medium text-gray-900 mb-2">🤖 Automate recurring tasks</p>
+                                        <p class="text-xs text-gray-700 mb-3">I noticed you manually create similar jobs for 6 clients every month. I can automate this process and save you ~4 hours/month.</p>
+                                        <button class="px-3 py-1.5 rounded-lg bg-primary hover:bg-primary/90 text-white text-xs font-medium transition-all">
+                                            Set up automation
+                                        </button>
+                                    </div>
+
+                                    <div class="action-card bg-green-50 rounded-lg p-4 border border-green-200">
+                                        <p class="text-sm font-medium text-gray-900 mb-2">📧 Template optimization</p>
+                                        <p class="text-xs text-gray-700 mb-3">Create email templates for common client communications. This could reduce email drafting time by 60%.</p>
+                                        <button class="px-3 py-1.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-xs font-medium transition-all">
+                                            Create templates
+                                        </button>
+                                    </div>
+
+                                    <div class="action-card bg-orange-50 rounded-lg p-4 border border-orange-200">
+                                        <p class="text-sm font-medium text-gray-900 mb-2">⏰ Smart scheduling</p>
+                                        <p class="text-xs text-gray-700 mb-3">Your peak productivity is 9-11 AM. Schedule complex tasks like audits during this window for better outcomes.</p>
+                                        <button class="px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium transition-all">
+                                            Apply smart schedule
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Just now • AI-powered recommendations</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            messagesDiv.insertAdjacentHTML('beforeend', responseHTML);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Auto-scroll to bottom on load
+        window.addEventListener('load', () => {
+            const messagesDiv = document.getElementById('chatMessages');
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+    </script>
+</body>
+</html>
